@@ -1,0 +1,63 @@
+ desc atm;
++----------+--------------+------+-----+---------+----------------+
+| Field    | Type         | Null | Key | Default | Extra          |
++----------+--------------+------+-----+---------+----------------+
+| atm_id   | int          | NO   | PRI | NULL    | auto_increment |
+| bank_id  | int          | NO   | MUL | NULL    |                |
+| password | varchar(255) | NO   |     | NULL    |                |
+| balance  | float        | NO   |     | NULL    |                |
++----------+--------------+------+-----+---------+----------------+
+4 rows in set (0.00 sec)
+
+mysql> desc bank;
++----------+--------------+------+-----+---------+----------------+
+| Field    | Type         | Null | Key | Default | Extra          |
++----------+--------------+------+-----+---------+----------------+
+| bank_id  | int          | NO   | PRI | NULL    | auto_increment |
+| name     | varchar(100) | NO   | UNI | NULL    |                |
+| password | varchar(255) | NO   |     | NULL    |                |
++----------+--------------+------+-----+---------+----------------+
+3 rows in set (0.00 sec)
+
+mysql> desc customer;
++---------------+--------------+------+-----+-------------------+-------------------+
+| Field         | Type         | Null | Key | Default           | Extra             |
++---------------+--------------+------+-----+-------------------+-------------------+
+| customer_id   | int          | NO   | PRI | NULL              | auto_increment    |
+| bank_id       | int          | NO   | MUL | NULL              |                   |
+| first_name    | varchar(50)  | NO   |     | NULL              |                   |
+| last_name     | varchar(50)  | NO   |     | NULL              |                   |
+| email         | varchar(100) | NO   | UNI | NULL              |                   |
+| phone_number  | varchar(15)  | YES  |     | NULL              |                   |
+| address       | varchar(255) | YES  |     | NULL              |                   |
+| date_of_birth | date         | YES  |     | NULL              |                   |
+| created_at    | timestamp    | YES  |     | CURRENT_TIMESTAMP | DEFAULT_GENERATED |
+| password      | varchar(255) | NO   |     | NULL              |                   |
++---------------+--------------+------+-----+-------------------+-------------------+
+10 rows in set (0.00 sec)
+
+mysql> desc accounts;
++----------------+----------------------------+------+-----+-------------------+-------------------+
+| Field          | Type                       | Null | Key | Default           | Extra             |
++----------------+----------------------------+------+-----+-------------------+-------------------+
+| account_id     | int                        | NO   | PRI | NULL              | auto_increment    |
+| customer_id    | int                        | NO   | MUL | NULL              |                   |
+| account_number | varchar(20)                | NO   | UNI | NULL              |                   |
+| account_type   | enum('Savings','Checking') | NO   |     | NULL              |                   |
+| balance        | decimal(10,2)              | NO   |     | NULL              |                   |
+| password       | int                        | YES  |     | NULL              |                   |
+| created_at     | timestamp                  | YES  |     | CURRENT_TIMESTAMP | DEFAULT_GENERATED |
++----------------+----------------------------+------+-----+-------------------+-------------------+
+7 rows in set (0.00 sec)
+
+mysql> desc transactions;
++------------------+------------------------------+------+-----+-------------------+-------------------+
+| Field            | Type                         | Null | Key | Default           | Extra             |
++------------------+------------------------------+------+-----+-------------------+-------------------+
+| transaction_id   | int                          | NO   | PRI | NULL              | auto_increment    |
+| account_id       | int                          | NO   | MUL | NULL              |                   |
+| transaction_type | enum('Deposit','Withdrawal') | NO   |     | NULL              |                   |
+| amount           | decimal(10,2)                | NO   |     | NULL              |                   |
+| transaction_date | timestamp                    | YES  |     | CURRENT_TIMESTAMP | DEFAULT_GENERATED |
++------------------+------------------------------+------+-----+-------------------+-------------------+
+5 rows in set (0.00 sec)
