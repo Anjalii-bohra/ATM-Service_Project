@@ -24,23 +24,43 @@ public class AccountDao {
         }
     }
 
-    public void createAccount(int customerId) {
+    public boolean createAccount(int customerId) {
         if (connection == null) {
             System.out.println("NO CONNECTION");
-            return; // Return  an error
+            return false; // Return an error
         }
+
         // Generate a unique account number
         String accountNumber = generateAccountNumber();
 
-        System.out.print("Enter Account Type:\n 1. Savings \n 2. Current");
-        int accountTypeValue = Integer.parseInt(String.valueOf(scanner.nextInt()));
+        System.out.print("Enter Account Type:\n 1. Savings \n 2. Current: ");
+        int accountTypeValue = Integer.parseInt(scanner.nextLine());
+
+        // Validate the account type input
         AccountType accountType = AccountType.getByValue(accountTypeValue);
+        if (accountType == null) {
+            System.out.println("Invalid account type selection.");
+            return false;
+        }
 
         System.out.print("Enter the initial balance: ");
-        double initialBalance = Double.parseDouble(String.valueOf(scanner.nextDouble()));
+        double initialBalance = Double.parseDouble(scanner.nextLine());
+
+        // Validate the initial balance input
+        if (initialBalance < 0) {
+            System.out.println("Initial balance must be a non-negative value.");
+            return false;
+        }
 
         System.out.print("Enter Account PIN (4-digit pin): ");
-        int password = Integer.parseInt(String.valueOf(scanner.nextInt()));
+        int password = Integer.parseInt(scanner.nextLine());
+
+        // Validate the password input
+        if (password < 1000 || password > 9999) {
+            System.out.println("Password must be a 4-digit number.");
+            return false;
+        }
+
         // Insert customer information into the database
         String insertSql = "INSERT INTO Accounts (customer_id, account_number, account_type, balance, password) VALUES (?, ?, ?, ?, ?)";
 
@@ -50,16 +70,21 @@ public class AccountDao {
             ps.setString(3, accountType.getType());
             ps.setDouble(4, initialBalance);
             ps.setInt(5, password);
+
             int rows = ps.executeUpdate();
             if (rows > 0) {
                 System.out.println("New Account Created with Account Number: " + accountNumber);
+                return true;
             } else {
                 System.out.println("Failed to create a new account.");
+                return false;
             }
         } catch (SQLException e) {
             e.printStackTrace();
+            return false;
         }
     }
+
 
     public void updateAccountBalance() {
         System.out.print("Enter Account Number: ");

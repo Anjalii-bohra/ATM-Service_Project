@@ -10,7 +10,7 @@ public class DatabaseConnectionManager {
         dataSource.setDriverClassName("com.mysql.cj.jdbc.Driver"); // Change this to your database driver
         dataSource.setUrl("jdbc:mysql://localhost:3306/pmc_atm");
         dataSource.setUsername("root");
-        dataSource.setPassword("@rpana12#");
+        dataSource.setPassword("root");
 
         // Other pool configuration settings
         dataSource.setInitialSize(5); // Initial number of connections
