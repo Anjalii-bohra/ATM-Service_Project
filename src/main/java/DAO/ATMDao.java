@@ -10,15 +10,17 @@ import java.util.List;
 import java.util.Scanner;
 
 public class ATMDao {
-    static BasicDataSource dataSource = DatabaseConnectionManager.getDataSource();
-    static Connection connection = null;
-    static Scanner scanner;
+     BasicDataSource dataSource = DatabaseConnectionManager.getDataSource();
+     Connection connection = null;
+     Scanner scanner;
+     BankDao bankDao;
 
     public ATMDao() {
         // Create a connection using the DatabaseConnectionManager
         try {
             connection = dataSource.getConnection();
             scanner = new Scanner(System.in);
+            bankDao = new BankDao();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -29,6 +31,9 @@ public class ATMDao {
             System.out.println("NO CONNECTION");
             return false; // Return an error
         }
+
+        System.out.print("Enter the Bank Id according to the ");
+        bankDao.listBanks();
 
         System.out.print("Enter Bank ID : ");
         int bankId = Integer.parseInt(scanner.nextLine());

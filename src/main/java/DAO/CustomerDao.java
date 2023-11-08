@@ -134,8 +134,6 @@ public class CustomerDao {
         }
     }
 
-
-
     public void updateCustomer() {
         if (connection == null) {
             System.out.println("NO CONNECTION");

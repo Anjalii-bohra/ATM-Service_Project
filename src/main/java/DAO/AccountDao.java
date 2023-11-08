@@ -27,64 +27,82 @@ public class AccountDao {
     public boolean createAccount(int customerId) {
         if (connection == null) {
             System.out.println("NO CONNECTION");
-            return false; // Return an error
-        }
-
-        // Generate a unique account number
-        String accountNumber = generateAccountNumber();
-
-        System.out.print("Enter Account Type:\n 1. Savings \n 2. Current: ");
-        int accountTypeValue = Integer.parseInt(scanner.nextLine());
-
-        // Validate the account type input
-        AccountType accountType = AccountType.getByValue(accountTypeValue);
-        if (accountType == null) {
-            System.out.println("Invalid account type selection.");
             return false;
         }
 
-        System.out.print("Enter the initial balance: ");
-        double initialBalance = Double.parseDouble(scanner.nextLine());
+        try {
+            connection.setAutoCommit(false); // Start a transaction
 
-        // Validate the initial balance input
-        if (initialBalance < 0) {
-            System.out.println("Initial balance must be a non-negative value.");
-            return false;
-        }
+            // Generate a unique account number
+            String accountNumber = generateAccountNumber();
 
-        System.out.print("Enter Account PIN (4-digit pin): ");
-        int password = Integer.parseInt(scanner.nextLine());
+            System.out.print("Enter Account Type:\n 1. Savings \n 2. Current: ");
+            int accountTypeValue = Integer.parseInt(scanner.nextLine());
 
-        // Validate the password input
-        if (password < 1000 || password > 9999) {
-            System.out.println("Password must be a 4-digit number.");
-            return false;
-        }
+            // Validate the account type input
+            AccountType accountType = AccountType.getByValue(accountTypeValue);
+            if (accountType == null) {
+                System.out.println("Invalid account type selection.");
+                connection.rollback(); // Rollback the transaction
+                return false;
+            }
 
-        // Insert customer information into the database
-        String insertSql = "INSERT INTO Accounts (customer_id, account_number, account_type, balance, password) VALUES (?, ?, ?, ?, ?)";
+            System.out.print("Enter the initial balance: ");
+            double initialBalance = Double.parseDouble(scanner.nextLine());
 
-        try (PreparedStatement ps = connection.prepareStatement(insertSql)) {
-            ps.setInt(1, customerId);
-            ps.setString(2, accountNumber);
-            ps.setString(3, accountType.getType());
-            ps.setDouble(4, initialBalance);
-            ps.setInt(5, password);
+            // Validate the initial balance input
+            if (initialBalance < 0) {
+                System.out.println("Initial balance must be a non-negative value.");
+                connection.rollback(); // Rollback the transaction
+                return false;
+            }
 
-            int rows = ps.executeUpdate();
-            if (rows > 0) {
-                System.out.println("New Account Created with Account Number: " + accountNumber);
-                return true;
-            } else {
-                System.out.println("Failed to create a new account.");
+            System.out.print("Enter Account PIN (4-digit pin): ");
+            int password = Integer.parseInt(scanner.nextLine());
+
+            // Validate the password input
+            if (password < 1000 || password > 9999) {
+                System.out.println("Password must be a 4-digit number.");
+                connection.rollback(); // Rollback the transaction
+                return false;
+            }
+
+            // Insert account information into the database
+            String insertSql = "INSERT INTO Accounts (customer_id, account_number, account_type, balance, password) VALUES (?, ?, ?, ?, ?)";
+
+            try (PreparedStatement ps = connection.prepareStatement(insertSql)) {
+                ps.setInt(1, customerId);
+                ps.setString(2, accountNumber);
+                ps.setString(3, accountType.getType());
+                ps.setDouble(4, initialBalance);
+                ps.setInt(5, password);
+
+                int rows = ps.executeUpdate();
+                if (rows > 0) {
+                    System.out.println("New Account Created with Account Number: " + accountNumber);
+                    connection.commit(); // Commit the transaction
+                    return true;
+                } else {
+                    System.out.println("Failed to create a new account.");
+                    connection.rollback(); // Rollback the transaction
+                    return false;
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+                connection.rollback(); // Rollback the transaction on exception
                 return false;
             }
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
+        } finally {
+            try {
+                connection.setAutoCommit(true); // Restore auto-commit mode
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
     }
-
 
     public void updateAccountBalance() {
         System.out.print("Enter Account Number: ");

@@ -13,9 +13,9 @@ import java.util.Scanner;
 
 
 public class TransactionDao {
-    static BasicDataSource dataSource = DatabaseConnectionManager.getDataSource();
-    static Connection connection;
-    static Scanner scanner;
+    BasicDataSource dataSource = DatabaseConnectionManager.getDataSource();
+     Connection connection;
+  Scanner scanner;
     static AccountDao accountDao ;
 
     public TransactionDao() throws SQLException {
@@ -28,7 +28,7 @@ public class TransactionDao {
         }
     }
 
-    public static boolean createTransaction(String accountNumber, double newBalance, TransactionType transactionType) {
+    public boolean createTransaction(String accountNumber, double amount, TransactionType transactionType) {
         if (connection == null) {
             System.out.println("NO CONNECTION");
             return false;
@@ -38,7 +38,7 @@ public class TransactionDao {
         String insertSql = "INSERT INTO Transactions (account_id, amount, transaction_type) VALUES (?, ?, ?)";
         try (PreparedStatement ps = connection.prepareStatement(insertSql)) {
             ps.setInt(1, accountId);
-            ps.setDouble(2, newBalance);
+            ps.setDouble(2, amount);
             ps.setString(3, transactionType.getDisplayName());
             int rows = ps.executeUpdate();
             return rows > 0;
@@ -81,7 +81,7 @@ public class TransactionDao {
         return transactionList;
     }
 
-    public static boolean Deposit() {
+    public synchronized boolean Deposit() {
         try {
             connection.setAutoCommit(false);
 
@@ -102,7 +102,7 @@ public class TransactionDao {
                 ps.setString(2, accountNumber);
                 int rows = ps.executeUpdate();
                 if (rows > 0) {
-                    boolean transactionCreated = createTransaction(accountNumber, newBalance, TransactionType.DEPOSIT);
+                    boolean transactionCreated = createTransaction(accountNumber, depositAmount, TransactionType.DEPOSIT);
                     if (transactionCreated) {
                         // Commit the transaction.
                         connection.commit();
@@ -131,7 +131,7 @@ public class TransactionDao {
         return false;
     }
 
-    public static void Withdraw() {
+    public synchronized void Withdraw() {
         try {
             // Begin a transaction if your database supports it.
             connection.setAutoCommit(false);
@@ -157,11 +157,11 @@ public class TransactionDao {
             // Update the account balance in the database.
             String updateSql = "UPDATE Accounts SET balance = ? WHERE account_number = ?";
             try (PreparedStatement ps = connection.prepareStatement(updateSql)) {
-                ps.setDouble(1, newBalance);
+                ps.setDouble(1, withdrawAmount);
                 ps.setString(2, accountNumber);
                 int rows = ps.executeUpdate();
                 if (rows > 0) {
-                    boolean transactionCreated = createTransaction(accountNumber, newBalance, TransactionType.WITHDRAWAL);
+                    boolean transactionCreated = createTransaction(accountNumber, withdrawAmount, TransactionType.WITHDRAWAL);
                     if (transactionCreated) {
                         // Commit the transaction.
                         connection.commit();
@@ -190,18 +190,18 @@ public class TransactionDao {
     }
 
     // Get the deposit amount from the user
-    public static double getDepositAmount() {
+    public double getDepositAmount() {
         System.out.print("Enter deposit amount: $");
         return Double.parseDouble(scanner.nextLine());
     }
 
     // Get the withdrawal amount from the user
-    public static double getWithdrawalAmount() {
+    public double getWithdrawalAmount() {
         System.out.print("Enter withdrawal amount: $");
         return Double.parseDouble(scanner.nextLine());
     }
 
-    public static String getAccountNumber() {
+    public String getAccountNumber() {
         System.out.print("Enter Account Number : ");
         return scanner.nextLine();
     }
